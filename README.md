@@ -1,45 +1,45 @@
 # Assembly_Network-distributor-master
 
-Experimentálny proxy DHCP server napísaný v ARM assembly pre Linux. Projekt bol prenesený z vetvy `master` repozitára [Assembly_Network-distributor](https://github.com/CreperAvatar/Assembly_Network-distributor).
+An experimental proxy DHCP server written in ARM assembly for Linux. This project was transferred from the `master` branch of [Assembly_Network-distributor](https://github.com/CreperAvatar/Assembly_Network-distributor).
 
-Program počúva na DHCP porte `67` a vytvára DHCP odpoveď pre PXE klientov. Z odpovede poskytuje adresu TFTP servera odvodenú od IP adresy sieťového rozhrania a názov boot súboru `pxelinux.0`. Zdrojový kód nastavuje PXE/DHCP voľby vrátane vendor class `PXEClient`.
+The program listens on DHCP port `67` and creates DHCP replies for PXE clients. The reply provides a TFTP server address derived from the network interface's IP address and the boot file name `pxelinux.0`. The source code sets PXE/DHCP options, including the `PXEClient` vendor class.
 
-> Toto je experimentálny prototyp. Pred použitím v sieti si dôkladne over jeho správanie a konfiguráciu; nesprávne DHCP odpovede môžu ovplyvniť ostatných klientov v sieti.
+> This is an experimental prototype. Carefully verify its behavior and configuration before using it on a network; incorrect DHCP replies may affect other clients on the network.
 
-## Súbory
+## Files
 
-- `proxyDHCP.s` – zdrojový kód proxy DHCP servera v ARM assembly.
-- `proxyDHCP` – zostavený spustiteľný súbor.
+- `proxyDHCP.s` – proxy DHCP server source code in ARM assembly.
+- `proxyDHCP` – compiled executable.
 
-## Požiadavky
+## Requirements
 
-- 32-bitový ARM Linux kompatibilný so systémovými volaniami v zdrojovom kóde.
-- GNU Binutils (`as` a `ld`), ak chceš program zostaviť zo zdrojového kódu.
-- Sieťové rozhranie s názvom `eth0`.
-- Prístup k UDP portu `67`; spustenie servera bude spravidla vyžadovať oprávnenia root alebo príslušnú capability.
-- PXE klient a dostupný TFTP server, ktorý poskytuje boot súbor `pxelinux.0`.
+- 32-bit ARM Linux compatible with the system calls used in the source code.
+- GNU Binutils (`as` and `ld`) if you want to build the program from source.
+- A network interface named `eth0`.
+- Access to UDP port `67`; running the server will generally require root privileges or the appropriate capability.
+- A PXE client and an available TFTP server serving the boot file `pxelinux.0`.
 
-## Zostavenie
+## Build
 
-V koreňovom adresári projektu spusti:
+From the project root, run:
 
 ```sh
 as -o proxyDHCP.o proxyDHCP.s
 ld -o proxyDHCP proxyDHCP.o
 ```
 
-## Nastavenie a spustenie
+## Configuration and running
 
-Zdrojový kód má natvrdo nastavené rozhranie `eth0` a názov boot súboru `pxelinux.0`. Uprav tieto hodnoty v `proxyDHCP.s`, ak sa tvoje prostredie líši, a program znovu zostav.
+The source code has the network interface `eth0` and boot file name `pxelinux.0` hard-coded. If your environment differs, change these values in `proxyDHCP.s` and rebuild the program.
 
-Spustenie:
+Run it with:
 
 ```sh
 sudo ./proxyDHCP
 ```
 
-Spúšťaj ho iba v testovacej alebo vyhradenej sieti, kde je DHCP/PXE konfigurácia pod tvojou kontrolou. Zabezpeč, aby bol boot súbor dostupný cez TFTP na adrese oznámenej klientovi.
+Run it only in a test or dedicated network where you control the DHCP/PXE configuration. Ensure that the boot file is available over TFTP at the address announced to the client.
 
-## Bezpečnostné upozornenie
+## Security warning
 
-DHCP používa broadcast komunikáciu a server nemá v projekte viditeľnú autentifikáciu. Nesprávne alebo súbežné DHCP služby môžu narušiť prideľovanie sieťových nastavení. TFTP navyše neposkytuje šifrovanie ani autentifikáciu. Používaj tento prototyp len v izolovanej, dôveryhodnej sieti a neposkytuj cez TFTP citlivé súbory.
+DHCP uses broadcast communication, and the project does not appear to implement authentication. Incorrect or competing DHCP services may disrupt network configuration. TFTP also provides neither encryption nor authentication. Use this prototype only on an isolated, trusted network, and do not serve sensitive files over TFTP.
